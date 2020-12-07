@@ -111,38 +111,6 @@ Will add test data (10 containers) to our network
  */
 func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
 	timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
-	containers := []Container{
-		Container{Description: "Apples", Location: "67.0006, -70.5476", Timestamp: timestamp, Holder: "Producer"},
-		Container{Description: "Oranges", Location: "91.2395, -49.4594", Timestamp: timestamp, Holder: "Freight Forwarder"},
-		Container{Description: "Avocados", Location: "58.0148, 59.01391", Timestamp: timestamp, Holder: "Customs"},
-		Container{Description: "Pineapples", Location: "-45.0945, 0.7949", Timestamp: timestamp, Holder: "Producer"},
-		Container{Description: "Olives", Location: "-107.6043, 19.5003", Timestamp: timestamp, Holder: "Shipper"},
-		Container{Description: "Mangos", Location: "-155.2304, -15.8723", Timestamp: timestamp, Holder: "Distributor"},
-		Container{Description: "Grapefruits", Location: "103.8842, 22.1277", Timestamp: timestamp, Holder: "Customs"},
-		Container{Description: "Watermelons", Location: "-132.3207, -34.0983", Timestamp: timestamp, Holder: "Freight Forwarder"},
-		Container{Description: "Bananas", Location: "153.0054, 12.6429", Timestamp: timestamp, Holder: "Shipper"},
-		Container{Description: "Clementines", Location: "51.9435, 8.2735", Timestamp: timestamp, Holder: "Retailer"},
-	}
-
-	i := 0
-	for i < len(containers) {
-		containerAsBytes, _ := json.Marshal(containers[i])
-		APIstub.PutState(strconv.Itoa(i+1), containerAsBytes)
-
-		// Define own values for IOTA MAM message mode and MAM message encryption key
-		// If not set, default values from iota/config.go file will be used
-		mode := iota.MamMode
-		sideKey := iota.PadSideKey(iota.MamSideKey) // iota.PadSideKey(iota.GenerateRandomSeedString(50))
-		
-		mamState, root, seed := iota.PublishAndReturnState(string(containerAsBytes), false, "", "", mode, sideKey)
-		iotaPayload := IotaPayload{Seed: seed, MamState: mamState, Root: root, Mode: mode, SideKey: sideKey}
-		iotaPayloadAsBytes, _ := json.Marshal(iotaPayload)
-		APIstub.PutState("IOTA_" + strconv.Itoa(i+1), iotaPayloadAsBytes)
-
-		fmt.Println("New Asset", strconv.Itoa(i+1), containers[i], root, mode, sideKey)
-		
-		i = i + 1
-	}
 
 	// Insert samples
 	samples := []Sample{
@@ -151,7 +119,7 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 		Sample{Force: "143.29", Stretching: "3", Holder: "C", Timestamp: timestamp},
 	}
 
-	i = 0
+	i := 0
 
 	for i < len(samples) {
 		sampleAsBytes, _ := json.Marshal(samples[i])
@@ -173,12 +141,6 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 	}
 
 	participants := []Participant{
-		Participant{Role: "Producer", Description: "Farmer / Goods producer"},
-		Participant{Role: "Freight Forwarder", Description: "Logistics"},
-		Participant{Role: "Customs", Description: ""},
-		Participant{Role: "Shipper", Description: ""},
-		Participant{Role: "Distributor", Description: "Fruits distributor"},
-		Participant{Role: "Retailer", Description: "Large grocery store"},
 		Participant{Role: "A", Description: "Participant A"},
 		Participant{Role: "B", Description: "Participant B"},
 		Participant{Role: "C", Description: "Participant C"},
