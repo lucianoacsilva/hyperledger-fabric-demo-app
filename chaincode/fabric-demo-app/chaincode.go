@@ -41,6 +41,13 @@ type Container struct {
 	Holder  string `json:"holder"`
 }
 
+type Sample struct {
+	Force string `json:"force"`
+	Stretching string `json:"stretching"`
+	Holder  string `json:"holder"`
+	Timestamp string `json:"timestamp"`
+}
+
 type IotaWallet struct {
 	Seed        string `json:"seed"`
 	Address     string `json:"address"`
@@ -137,6 +144,34 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 		i = i + 1
 	}
 
+	// Insert samples
+	samples := []Sample{
+		Sample{Force: "58.22", Stretching: "1", Holder: "A", Timestamp: timestamp},
+		Sample{Force: "104, 25", Stretching: "2", Holder: "B", Timestamp: timestamp},
+		Sample{Force: "143.29", Stretching: "3", Holder: "C", Timestamp: timestamp},
+	}
+
+	i = 0
+
+	for i < len(samples) {
+		sampleAsBytes, _ := json.Marshal(samples[i])
+		APIstub.PutState(strconv.Itoa(i+1), sampleAsBytes)
+
+		// Define own values for IOTA MAM message mode and MAM message encryption key
+		// If not set, default values from iota/config.go file will be used
+		mode := iota.MamMode
+		sideKey := iota.PadSideKey(iota.MamSideKey) // iota.PadSideKey(iota.GenerateRandomSeedString(50))
+		
+		mamState, root, seed := iota.PublishAndReturnState(string(sampleAsBytes), false, "", "", mode, sideKey)
+		iotaPayload := IotaPayload{Seed: seed, MamState: mamState, Root: root, Mode: mode, SideKey: sideKey}
+		iotaPayloadAsBytes, _ := json.Marshal(iotaPayload)
+		APIstub.PutState("IOTA_" + strconv.Itoa(i+1), iotaPayloadAsBytes)
+
+		fmt.Println("New Asset", strconv.Itoa(i+1), samples[i], root, mode, sideKey)
+		
+		i = i + 1
+	}
+
 	participants := []Participant{
 		Participant{Role: "Producer", Description: "Farmer / Goods producer"},
 		Participant{Role: "Freight Forwarder", Description: "Logistics"},
@@ -144,6 +179,9 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 		Participant{Role: "Shipper", Description: ""},
 		Participant{Role: "Distributor", Description: "Fruits distributor"},
 		Participant{Role: "Retailer", Description: "Large grocery store"},
+		Participant{Role: "A", Description: "Participant A"},
+		Participant{Role: "B", Description: "Participant B"},
+		Participant{Role: "C", Description: "Participant C"},
 	}
 
 	for i := range participants {
