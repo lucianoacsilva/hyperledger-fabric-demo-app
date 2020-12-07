@@ -145,7 +145,13 @@ module.exports = {
 	create_record: (req, res) => {
 		console.log("submit recording of a container: ");
 
-		const { key, location, description, holder } = req.body;
+		const { 
+			key, 
+			force, 
+			stretching, 
+			holder 
+		} = req.body;
+		
 		const fabric_client = new Fabric_Client();
 
 		// setup the fabric network
@@ -190,8 +196,8 @@ module.exports = {
 		    const request = {
 		        //targets : --- letting this default to the peers assigned to the channel
 		        chaincodeId: 'fabric-demo-app',
-		        fcn: 'recordContainer',
-		        args: [key, description, location, holder],
+		        fcn: 'recordSample',
+		        args: [key, force, stretching, holder],
 		        chainId: 'mychannel',
 		        txId: tx_id
 		    };

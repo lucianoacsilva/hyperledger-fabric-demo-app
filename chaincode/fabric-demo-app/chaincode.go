@@ -94,8 +94,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.querySample(APIstub, args)
 	} else if function == "initLedger" {
 		return s.initLedger(APIstub)
-	} else if function == "recordContainer" {
-		return s.recordContainer(APIstub, args)
+	} else if function == "recordSample" {
+		return s.recordSample(APIstub, args)
 	} else if function == "queryAllContainers" {
 		return s.queryAllContainers(APIstub)
 	} else if function == "changeContainerHolder" {
@@ -163,22 +163,22 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 }
 
 /*
- * The recordContainer method *
+ * The recordSample method *
 Container owners like Sarah would use to record each of her containers. 
 This method takes in five arguments (attributes to be saved in the ledger). 
  */
-func (s *SmartContract) recordContainer(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+func (s *SmartContract) recordSample(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if len(args) != 4 {
 		return shim.Error("Incorrect number of arguments. Expecting 4")
 	}
 
 	timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
-	container := Container{ Description: args[1], Location: args[2], Timestamp: timestamp, Holder: args[3] }
+	sample := Sample{ Force: args[1], Stretching: args[2], Holder: args[3], Timestamp: timestamp }
 
-	containerAsBytes, _ := json.Marshal(container)
-	err := APIstub.PutState(args[0], containerAsBytes)
+	sampleAsBytes, _ := json.Marshal(sample)
+	err := APIstub.PutState(args[0], sampleAsBytes)
 	if err != nil {
-		return shim.Error(fmt.Sprintf("Failed to record container: %s", args[0]))
+		return shim.Error(fmt.Sprintf("Failed to record sample: %s", args[0]))
 	}
 
 	// Define own values for IOTA MAM message mode and MAM message encryption key
@@ -186,20 +186,20 @@ func (s *SmartContract) recordContainer(APIstub shim.ChaincodeStubInterface, arg
 	mode := iota.MamMode
 	sideKey := iota.PadSideKey(iota.MamSideKey) // iota.PadSideKey(iota.GenerateRandomSeedString(50))
 	
-	mamState, root, seed := iota.PublishAndReturnState(string(containerAsBytes), false, "", "", mode, sideKey)	
+	mamState, root, seed := iota.PublishAndReturnState(string(sampleAsBytes), false, "", "", mode, sideKey)	
 	iotaPayload := IotaPayload{Seed: seed, MamState: mamState, Root: root, Mode: mode, SideKey: sideKey}
 	iotaPayloadAsBytes, _ := json.Marshal(iotaPayload)
 	APIstub.PutState("IOTA_" + args[0], iotaPayloadAsBytes)
 
-	fmt.Println("New Asset", args[0], container, root, mode, sideKey)
+	fmt.Println("New Asset", args[0], sample, root, mode, sideKey)
 
 	return shim.Success(nil)
 }
 
 /*
  * The querySample method *
-Used to view the records of one particular container
-It takes one argument -- the key for the container in question
+Used to view the records of one particular sample
+It takes one argument -- the key for the sample in question
  */
  func (s *SmartContract) querySample(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if len(args) != 1 {
