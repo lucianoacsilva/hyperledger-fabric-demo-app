@@ -111,11 +111,11 @@ module.exports = {
 		        throw new Error('Failed to get adminUser.... run registerUser.js');
 		    }
 
-		    // queryContainer - requires 1 argument, ex: args: ['4'],
+		    // querySample - requires 1 argument, ex: args: ['4'],
 		    const request = {
 		        chaincodeId: 'fabric-demo-app',
 		        txId: tx_id,
-		        fcn: 'queryContainer',
+		        fcn: 'querySample',
 		        args: [key]
 		    };
 

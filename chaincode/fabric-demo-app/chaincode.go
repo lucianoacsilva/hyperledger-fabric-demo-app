@@ -90,8 +90,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 	// Retrieve the requested Smart Contract function and arguments
 	function, args := APIstub.GetFunctionAndParameters()
 	// Route to the appropriate handler function to interact with the ledger
-	if function == "queryContainer" {
-		return s.queryContainer(APIstub, args)
+	if function == "querySample" {
+		return s.querySample(APIstub, args)
 	} else if function == "initLedger" {
 		return s.initLedger(APIstub)
 	} else if function == "recordContainer" {
@@ -197,21 +197,21 @@ func (s *SmartContract) recordContainer(APIstub shim.ChaincodeStubInterface, arg
 }
 
 /*
- * The queryContainer method *
+ * The querySample method *
 Used to view the records of one particular container
 It takes one argument -- the key for the container in question
  */
- func (s *SmartContract) queryContainer(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+ func (s *SmartContract) querySample(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if len(args) != 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
 
-	containerAsBytes, _ := APIstub.GetState(args[0])
-	if containerAsBytes == nil {
-		return shim.Error("Could not locate container")
+	sampleAsBytes, _ := APIstub.GetState(args[0])
+	if sampleAsBytes == nil {
+		return shim.Error("Could not locate sample")
 	}
-	container := Container{}
-	json.Unmarshal(containerAsBytes, &container)
+	sample := Sample{}
+	json.Unmarshal(sampleAsBytes, &sample)
 
 	iotaPayloadAsBytes, _ := APIstub.GetState("IOTA_" + args[0])
 	if iotaPayloadAsBytes == nil {
@@ -227,7 +227,7 @@ It takes one argument -- the key for the container in question
 	// IOTA MAM stream values
 	messages := iota.Fetch(iotaPayload.Root, iotaPayload.Mode, iotaPayload.SideKey)
 
-	participantAsBytes, _ := APIstub.GetState(container.Holder)
+	participantAsBytes, _ := APIstub.GetState(sample.Holder)
 	if participantAsBytes == nil {
 		return shim.Error("Could not locate participant")
 	}
@@ -235,7 +235,7 @@ It takes one argument -- the key for the container in question
 	json.Unmarshal(participantAsBytes, &participant)
 
 	out := map[string]interface{}{}
-	out["container"] = container
+	out["sample"] = sample
 	out["mamstate"] = mamstate
 	out["messages"] = strings.Join(messages, ", ")
 	out["wallet"] = participant.Address
