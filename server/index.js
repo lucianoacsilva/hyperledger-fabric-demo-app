@@ -5,7 +5,8 @@ const {
     get_container, 
     get_all_containers, 
     change_record, 
-    delete_record
+    delete_record,
+    get_record_history
 } = require('./controller.js');
 
 // Save our port
@@ -33,6 +34,10 @@ app.post('/create', (req, res) => {
 
 app.delete('/delete/:key', (req, res) => {
     delete_record(req, res);
+});
+
+app.get('/get_history/:key', (req, res) => {
+    get_record_history(req, res);
 });
 
 // set up a static file server that points to the "client" directory
