@@ -98,6 +98,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.recordSample(APIstub, args)
 	} else if function == "queryAllContainers" {
 		return s.queryAllContainers(APIstub)
+	} else if function == "changeSample" {
+		return s.changeSample(APIstub, args) 
 	} else if function == "deleteSample" {
 		return s.deleteSample(APIstub, args)
 	} else if function == "getHistoryForSample" {
@@ -117,7 +119,7 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 	// Insert samples
 	samples := []Sample{
 		Sample{Force: "58.22", Stretching: "1", Holder: "A", Timestamp: timestamp},
-		Sample{Force: "104, 25", Stretching: "2", Holder: "B", Timestamp: timestamp},
+		Sample{Force: "104.25", Stretching: "2", Holder: "B", Timestamp: timestamp},
 		Sample{Force: "143.29", Stretching: "3", Holder: "C", Timestamp: timestamp},
 	}
 
