@@ -176,10 +176,16 @@ func (s *SmartContract) recordSample(APIstub shim.ChaincodeStubInterface, args [
 		return shim.Error("Incorrect number of arguments. Expecting 4")
 	}
 
+	// Verifies if record with id already exists
+	sampleAsBytes, _ := APIstub.GetState(args[0])
+	if sampleAsBytes != nil {
+		return shim.Error("Sample already exists")
+	}
+
 	timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
 	sample := Sample{ Force: args[1], Stretching: args[2], Holder: args[3], Timestamp: timestamp }
 
-	sampleAsBytes, _ := json.Marshal(sample)
+	sampleAsBytes, _ = json.Marshal(sample)
 	err := APIstub.PutState(args[0], sampleAsBytes)
 	if err != nil {
 		return shim.Error(fmt.Sprintf("Failed to record sample: %s", args[0]))
