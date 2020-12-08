@@ -13,7 +13,9 @@ class App extends Component {
       newsampleKey: '',
       containerDescription: '',
       holderName: '',
-      allContainers: []
+      allContainers: [],
+      force: '',
+      stretching: ''
     };
 
     this.changeHolder = this.changeHolder.bind(this);
@@ -28,18 +30,21 @@ class App extends Component {
 
   createRecord(event) {
     event.preventDefault();
-    const { newsampleKey, containerDescription, longitude, latitude, holderName } = this.state;
-    if (newsampleKey && containerDescription && longitude && latitude && holderName) {
+    const { 
+      holderName,
+      force,
+      stretching 
+    } = this.state;
+    if (force && stretching && holderName) {
       fetch('create', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          key: newsampleKey,
           holder: holderName,
-          description: containerDescription,
-          location: `${longitude}, ${latitude}`
+          force,
+          stretching
         }),
       })
       .then(response => response.json())
@@ -197,55 +202,37 @@ class App extends Component {
 
         <div className="createRecord">
           <form onSubmit={this.createRecord}>
-            <label>Create Container Record</label>
+            <label>Create Sample Record</label>
             <br />
-            Enter container id:
+            Enter sample force:
             <input
               className="form-control" 
-              id="newContainerId"
-              name="newContainerId" 
+              id="force"
+              name="force" 
               type="text" 
               placeholder="Ex: 11" 
-              value={this.state.newContainerId}
+              value={this.state.force}
               onChange={this.handleTextChange}
             />
-            Enter container description: 
+
+            Enter sample stretching: 
             <input 
               className="form-control" 
-              id="containerDescription"
-              name="containerDescription" 
-              type="text" 
-              placeholder="Ex: 0239L" 
-              value={this.state.containerDescription}
-              onChange={this.handleTextChange}
-            />
-            Enter longitude: 
-            <input 
-              className="form-control" 
-              id="longitude"
-              name="longitude" 
+              id="stretching"
+              name="stretching" 
               type="number" 
-              placeholder="Ex: 28.012"
-              value={this.state.longitude}
+              placeholder="Ex: 7"
+              value={this.state.stretching}
               onChange={this.handleTextChange}
             /> 
-            Enter latitude: 
-            <input 
-              className="form-control" 
-              id="latitude"
-              name="latitude" 
-              type="number" 
-              placeholder="Ex: 150.405"
-              value={this.state.latitude}
-              onChange={this.handleTextChange}
-            />
+            
             Enter name of holder: 
             <input 
               className="form-control" 
               id="holderName"
               name="holderName" 
               type="text" 
-              placeholder="Ex: Hansel" 
+              placeholder="Ex: A" 
               value={this.state.holderName}
               onChange={this.handleTextChange}
             />
