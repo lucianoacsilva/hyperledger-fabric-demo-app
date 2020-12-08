@@ -261,10 +261,9 @@ allows for assessing all the records added to the ledger(all containers)
 This method does not take any arguments. Returns JSON string containing results. 
  */
 func (s *SmartContract) queryAllContainers(APIstub shim.ChaincodeStubInterface) sc.Response {
-	startKey := "0"
-	endKey := "999"
+	queryAllSamples := "{\"selector\":{\"_id\":{\"$regex\":\"^Sample\"}}}"
 
-	resultsIterator, err := APIstub.GetStateByRange(startKey, endKey)
+	resultsIterator, err := APIstub.GetQueryResult(queryAllSamples)
 	if err != nil {
 		return shim.Error(err.Error())
 	}

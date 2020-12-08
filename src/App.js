@@ -142,8 +142,8 @@ class App extends Component {
             Enter a sample ID: <br />
             <input
               id="sampleKey"
-              type="number"
-              placeholder="Ex: 3"
+              type="string"
+              placeholder="Ex: Sample_1"
               value={this.state.sampleKey}
               onChange={this.handleTextChange}
             />

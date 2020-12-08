@@ -147,8 +147,11 @@ module.exports = {
 	create_record: (req, res) => {
 		console.log("submit recording of a container: ");
 
-		const { 
-			key, 
+		// Generate random key
+		const randomKey = Math.random().toString(16).slice(2);
+		const key = "Sample_" + randomKey;
+
+		const {  
 			force, 
 			stretching, 
 			holder 
