@@ -303,11 +303,15 @@ module.exports = {
 			res.send({ success: false, error: `Failed to invoke create_record. ${err}` });
 		});
 	},
-	change_holder: (req, res) => {
+	change_record: (req, res) => {
 		console.log("changing holder of a container:", req.params);
 
-		const containerId = req.body.id;
-		const holder = req.body.holder;
+		const {
+			key
+		} = req.params;
+
+		const updateData = req.body;
+
 		const fabric_client = new Fabric_Client();
 
 		// setup the fabric network
@@ -352,8 +356,8 @@ module.exports = {
 		    const request = {
 		        //targets : --- letting this default to the peers assigned to the channel
 		        chaincodeId: 'fabric-demo-app',
-		        fcn: 'changeContainerHolder',
-		        args: [containerId, holder],
+		        fcn: 'changeSample',
+		        args: [key, JSON.stringify(updateData)],
 		        chainId: 'mychannel',
 		        txId: tx_id
 		    };
@@ -456,7 +460,7 @@ module.exports = {
 			}
 		}).catch(err => {
 			console.error('Failed to invoke successfully :: ' + err);
-			res.send({ success: false, error: `Failed to invoke change_holder. ${err}` });
+			res.send({ success: false, error: `Failed to invoke change_record. ${err}` });
 		});
 	}
 }

@@ -98,8 +98,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.recordSample(APIstub, args)
 	} else if function == "queryAllContainers" {
 		return s.queryAllContainers(APIstub)
-	} else if function == "changeContainerHolder" {
-		return s.changeContainerHolder(APIstub, args)
+	} else if function == "changeSample" {
+		return s.changeSample(APIstub, args)
 	}
 
 	return shim.Error("Invalid Smart Contract function name.")
@@ -307,35 +307,49 @@ func (s *SmartContract) queryAllContainers(APIstub shim.ChaincodeStubInterface) 
 }
 
 /*
- * The changeContainerHolder method *
+ * The changeSample method *
 The data in the world state can be updated with who has possession. 
 This function takes in 2 arguments, container ID and new holder name. 
  */
-func (s *SmartContract) changeContainerHolder(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+func (s *SmartContract) changeSample(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
 	if len(args) != 2 {
 		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
 
-	containerAsBytes, _ := APIstub.GetState(args[0])
-	if containerAsBytes == nil {
-		return shim.Error("Could not locate container")
-	}
-	container := Container{}
+	updateData := map[string]interface{}{}
+	json.Unmarshal([]byte(args[1]), &updateData)
+	sampleAsBytes, _ := APIstub.GetState(args[0])
 
-	json.Unmarshal(containerAsBytes, &container)
-	// Normally check that the specified argument is a valid holder of a container
+	if sampleAsBytes == nil {
+		return shim.Error("Could not locate sample")
+	}
+
+	sample := Sample{}
+
+	json.Unmarshal(sampleAsBytes, &sample)
+	// Normally check that the specified argument is a valid holder of a sample
 	// we are skipping this check for this example
-	previousContainerHolder := container.Holder
-	container.Holder = args[1]
+
+	if updateData["force"] != nil {
+		sample.Force = updateData["force"].(string)
+	}
+	
+	if updateData["stretching"] != nil {
+		sample.Stretching = updateData["stretching"].(string)
+	} 
+	
+	if updateData["holder"] != nil {
+		sample.Holder = updateData["holder"].(string)
+	}
 
 	timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
-	container.Timestamp = timestamp
+	sample.Timestamp = timestamp
 
-	containerAsBytes, _ = json.Marshal(container)
-	err := APIstub.PutState(args[0], containerAsBytes)
+	sampleAsBytes, _ = json.Marshal(sample)
+	err := APIstub.PutState(args[0], sampleAsBytes)
 	if err != nil {
-		return shim.Error(fmt.Sprintf("Failed to change container holder: %s", args[0]))
+		return shim.Error(fmt.Sprintf("Failed to change sample holder: %s", args[0]))
 	}
 
 	iotaPayloadAsBytes, _ := APIstub.GetState("IOTA_" + args[0])
@@ -345,35 +359,12 @@ func (s *SmartContract) changeContainerHolder(APIstub shim.ChaincodeStubInterfac
 	iotaPayload := IotaPayload{}
 	json.Unmarshal(iotaPayloadAsBytes, &iotaPayload)
 
-	mamState, _, _ := iota.PublishAndReturnState(string(containerAsBytes), true, iotaPayload.Seed, iotaPayload.MamState, iotaPayload.Mode, iotaPayload.SideKey)
+	mamState, _, _ := iota.PublishAndReturnState(string(sampleAsBytes), true, iotaPayload.Seed, iotaPayload.MamState, iotaPayload.Mode, iotaPayload.SideKey)
 	iotaPayloadNew := IotaPayload{Seed: iotaPayload.Seed, MamState: mamState, Root: iotaPayload.Root, Mode: iotaPayload.Mode, SideKey: iotaPayload.SideKey}
 	iotaPayloadNewAsBytes, _ := json.Marshal(iotaPayloadNew)
 	APIstub.PutState("IOTA_" + args[0], iotaPayloadNewAsBytes)
 
-	// make payment to the participant
-	participantAsBytes, _ := APIstub.GetState(previousContainerHolder)
-	if participantAsBytes == nil {
-		return shim.Error("Could not locate participant")
-	}
-	participant := Participant{}
-	json.Unmarshal(participantAsBytes, &participant)
-
-	iotaWalletAsBytes, _ := APIstub.GetState("IOTA_WALLET")
-	if iotaWalletAsBytes == nil {
-		return shim.Error("Could not locate wallet data")
-	}
-	iotaWallet := IotaWallet{}
-	json.Unmarshal(iotaWalletAsBytes, &iotaWallet)
-
-	newKeyIndex := iota.TransferTokens(iotaWallet.Seed, iotaWallet.KeyIndex, participant.Address)
-	iotaWallet.KeyIndex = newKeyIndex
-	iotaWalletAsBytes, _ = json.Marshal(iotaWallet)
-	err = APIstub.PutState("IOTA_WALLET", iotaWalletAsBytes)
-	if err != nil {
-		return shim.Error(fmt.Sprintf("Failed to update wallet with index: %s", strconv.FormatUint(newKeyIndex, 10)))
-	}
-
-	return shim.Success([]byte("changeContainerHolder success"))
+	return shim.Success([]byte("changeSample success"))
 }
 
 /*

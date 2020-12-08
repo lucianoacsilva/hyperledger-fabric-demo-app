@@ -1,6 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { create_record, change_holder, get_container, get_all_containers, } = require('./controller.js');
+const { 
+    create_record, 
+    get_container, 
+    get_all_containers, 
+    change_record 
+} = require('./controller.js');
 
 // Save our port
 const port = process.env.PORT || 3001;
@@ -15,8 +20,8 @@ app.get('/get/:id', (req, res) => {
 app.get('/get_all', (req, res) => {
     get_all_containers(req, res);
 });
-app.post('/change', (req, res) => {
-    change_holder(req, res);
+app.put('/change/:key', (req, res) => {
+    change_record(req, res);
 });
 app.post('/create', (req, res) => {
     create_record(req, res);
