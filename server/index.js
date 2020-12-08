@@ -4,7 +4,8 @@ const {
     create_record, 
     get_container, 
     get_all_containers, 
-    change_record 
+    change_record, 
+    delete_record
 } = require('./controller.js');
 
 // Save our port
@@ -17,14 +18,21 @@ app.use(bodyParser.json());
 app.get('/get/:id', (req, res) => {
     get_container(req, res);
 });
+
 app.get('/get_all', (req, res) => {
     get_all_containers(req, res);
 });
+
 app.put('/change/:key', (req, res) => {
     change_record(req, res);
 });
+
 app.post('/create', (req, res) => {
     create_record(req, res);
+});
+
+app.delete('/delete/:key', (req, res) => {
+    delete_record(req, res);
 });
 
 // set up a static file server that points to the "client" directory

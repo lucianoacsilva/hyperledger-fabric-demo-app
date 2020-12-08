@@ -98,9 +98,9 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.recordSample(APIstub, args)
 	} else if function == "queryAllContainers" {
 		return s.queryAllContainers(APIstub)
-	} else if function == "changeSample" {
-		return s.changeSample(APIstub, args)
-	}
+	} else if function == "deleteSample" {
+		return s.deleteSample(APIstub, args)
+	} 
 
 	return shim.Error("Invalid Smart Contract function name.")
 }
@@ -365,6 +365,23 @@ func (s *SmartContract) changeSample(APIstub shim.ChaincodeStubInterface, args [
 	APIstub.PutState("IOTA_" + args[0], iotaPayloadNewAsBytes)
 
 	return shim.Success([]byte("changeSample success"))
+}
+
+// Deletes an entity from state
+func (t *SmartContract) deleteSample(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
+
+	key := args[0]
+
+	// Delete the key from the state in ledger
+	err := APIstub.DelState(key)
+	if err != nil {
+		return shim.Error("Failed to delete sample")
+	}
+
+	return shim.Success([]byte("deleteSample success"))
 }
 
 /*
