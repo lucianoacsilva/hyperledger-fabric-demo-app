@@ -7,13 +7,11 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      containerId: '',
-      newHolderContainerId: '',
+      sampleKey: '',
+      newHoldersampleKey: '',
       newHolderName: '',
-      newContainerId: '',
+      newsampleKey: '',
       containerDescription: '',
-      longitude: '',
-      latitude: '',
       holderName: '',
       allContainers: []
     };
@@ -30,15 +28,15 @@ class App extends Component {
 
   createRecord(event) {
     event.preventDefault();
-    const { newContainerId, containerDescription, longitude, latitude, holderName } = this.state;
-    if (newContainerId && containerDescription && longitude && latitude && holderName) {
+    const { newsampleKey, containerDescription, longitude, latitude, holderName } = this.state;
+    if (newsampleKey && containerDescription && longitude && latitude && holderName) {
       fetch('create', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          key: newContainerId,
+          key: newsampleKey,
           holder: holderName,
           description: containerDescription,
           location: `${longitude}, ${latitude}`
@@ -58,9 +56,9 @@ class App extends Component {
 
   changeHolder(event) {
     event.preventDefault();
-    const { allContainers, newHolderContainerId, newHolderName } = this.state;
-    if (newHolderContainerId && newHolderName) {
-      const container = allContainers.find(({ Key }) => Key === newHolderContainerId)
+    const { allContainers, newHoldersampleKey, newHolderName } = this.state;
+    if (newHoldersampleKey && newHolderName) {
+      const container = allContainers.find(({ Key }) => Key === newHoldersampleKey)
       if (container && container.Record.holder === 'Retailer') {
         console.error('Container arrived to retailer. No further change possible');
         this.notifyError('Container arrived to retailer. No further change possible');
@@ -73,7 +71,7 @@ class App extends Component {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: newHolderContainerId,
+          id: newHoldersampleKey,
           holder: newHolderName
         }),
       })
@@ -95,16 +93,16 @@ class App extends Component {
 
   queryContainer(event) {
     event.preventDefault();
-    const { containerId } = this.state;
-    if (containerId) {
-      fetch(`get/${encodeURIComponent(containerId)}`)
+    const { sampleKey } = this.state;
+    if (sampleKey) {
+      fetch(`get/${encodeURIComponent(sampleKey)}`)
         .then(response => response.json())
         .then(data => {
           if (data.success && data.result) {
             const result = JSON.parse(data.result)
 
             this.setState({ 
-              allContainers: [{ Key: containerId, Record: result.container }]
+              allContainers: [{ Key: sampleKey, Record: result.sample }]
             });
             console.log("Wallet Address", result.wallet)
             console.log("MAM Root", result.mamstate.root)
@@ -140,17 +138,17 @@ class App extends Component {
         </header>
         <div className="queryContainer">
           <form onSubmit={this.queryContainer}>
-            <label>Query a Specific Container</label><br />
-            Enter a container ID: <br />
+            <label>Query a Specific Sample</label><br />
+            Enter a sample ID: <br />
             <input
-              id="containerId"
+              id="sampleKey"
               type="number"
               placeholder="Ex: 3"
-              value={this.state.containerId}
+              value={this.state.sampleKey}
               onChange={this.handleTextChange}
             />
             <br />
-            <button type="submit" className="btn btn-primary">Query Container Record</button>
+            <button type="submit" className="btn btn-primary">Query Sample Record</button>
           </form>
         </div>
         <br />
@@ -170,8 +168,8 @@ class App extends Component {
                     <th>ID</th>
                     <th>Timestamp</th>
                     <th>Holder</th>
-                    <th>Container Location (Longitude, Latitude)</th>
-                    <th>Container Description</th>
+                    <th>Stretching</th>
+                    <th>Force</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -183,8 +181,8 @@ class App extends Component {
                         <td>{container.Key}</td>
                         <td>{container.Record.timestamp}</td>
                         <td>{container.Record.holder}</td>
-                        <td>{container.Record.location}</td>
-                        <td>{container.Record.description}</td>
+                        <td>{container.Record.stretching}</td>
+                        <td>{container.Record.force}</td>
                       </tr>
                     ))
                   }
