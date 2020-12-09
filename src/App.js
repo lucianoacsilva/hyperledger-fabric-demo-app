@@ -25,6 +25,7 @@ class App extends Component {
     this.handleTextChange = this.handleTextChange.bind(this);
     this.queryContainer = this.queryContainer.bind(this);
     this.queryAllContainers = this.queryAllContainers.bind(this);
+    this.deleteRecord = this.deleteRecord.bind(this);
   }
 
   notifySuccess = message => toast.success(message);
@@ -91,21 +92,18 @@ class App extends Component {
       headers: {
         "Content-Type": "application/json",
       },
-        body: JSON.stringify({
-          id: newHoldersampleKey,
-          holder: newHolderName
-        }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success && data.result) {
+
+      body: JSON.stringify(reqBody),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.result) {
         this.notifySuccess('Sample was changed');
       } else {
         console.error(data.error);
         this.notifyError('Something went wrong');
       }
     });
-  }
   }
 
   handleTextChange = event => {
@@ -137,6 +135,33 @@ class App extends Component {
     }
   }
 
+  deleteRecord(event) {
+    event.preventDefault();
+    
+    const { 
+      sampleKey 
+    } = this.state;
+
+    if (sampleKey) {
+      fetch(`delete/${encodeURIComponent(sampleKey)}`, 
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.result) {
+            this.notifySuccess('Sample was deleted');
+          } else {
+            console.error(data.error);
+            this.notifyError('Something went wrong');
+          }
+        });
+    }
+  }
+
   queryAllContainers(event) {
     event.preventDefault();
     fetch('get_all')
@@ -157,6 +182,7 @@ class App extends Component {
           <div id="left_header">Hyperledger Fabric Demo Application</div>
           <i id="right_header">Example Blockchain Application for Hyperledger Fabric</i>
         </header>
+
         <div className="queryContainer">
           <form onSubmit={this.queryContainer}>
             <label>Query a Specific Sample</label><br />
@@ -172,6 +198,7 @@ class App extends Component {
             <button type="submit" className="btn btn-primary">Query Sample Record</button>
           </form>
         </div>
+
         <br />
         <br />
 
@@ -272,6 +299,7 @@ class App extends Component {
               value={this.state.sampleKey}
               onChange={this.handleTextChange}
             />
+
             Enter name of new holder:
             <input
               className="form-control"
@@ -282,7 +310,52 @@ class App extends Component {
               value={this.state.newHolderName}
               onChange={this.handleTextChange}
             />
+
+            Enter new force:
+            <input
+              className="form-control"
+              id="newForce"
+              name="newForce"
+              placeholder="Ex: 55.33"
+              type="text"
+              value={this.state.newForce}
+              onChange={this.handleTextChange}
+            />
+
+            Enter new stretching:
+            <input
+              className="form-control"
+              id="newStretching"
+              name="newStretching"
+              placeholder="Ex: 14"
+              type="text"
+              value={this.state.newStretching}
+              onChange={this.handleTextChange}
+            />
             <button type="submit" className="btn btn-primary">Change</button>
+          </form>
+        </div>
+
+        <br />
+        <br />
+
+        <div className="deleteSample">
+          <form onSubmit={this.deleteRecord}>
+            <label>Delete a Specific Sample</label><br />
+
+            Enter a sample ID: <br />
+
+            <input
+              id="sampleKey"
+              type="string"
+              placeholder="Ex: Sample_1"
+              value={this.state.sampleKey}
+              onChange={this.handleTextChange}
+            />
+
+            <br />
+
+            <button type="submit" className="btn btn-primary">Delete Record</button>
           </form>
         </div>
         
