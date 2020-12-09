@@ -8,9 +8,11 @@ class App extends Component {
     super(props);
     this.state = {
       sampleKey: '',
-      newHoldersampleKey: '',
-      newHolderName: '',
-      newsampleKey: '',
+      newHolderSampleKey: '',
+      newHolderName: null,
+      newForce: null,
+      newStretching: null,
+      newSampleKey: '',
       containerDescription: '',
       holderName: '',
       allContainers: [],
@@ -61,20 +63,34 @@ class App extends Component {
 
   changeHolder(event) {
     event.preventDefault();
-    const { allContainers, newHoldersampleKey, newHolderName } = this.state;
-    if (newHoldersampleKey && newHolderName) {
-      const container = allContainers.find(({ Key }) => Key === newHoldersampleKey)
-      if (container && container.Record.holder === 'Retailer') {
-        console.error('Container arrived to retailer. No further change possible');
-        this.notifyError('Container arrived to retailer. No further change possible');
-        return
-      }
+    const { 
+      allContainers, 
+      sampleKey, 
+      newHolderName,
+      newForce,
+      newStretching
+    } = this.state;
 
-      fetch('change', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+    const reqBody = {};
+
+    if (newHolderName) {
+      reqBody.holder = newHolderName
+    }
+
+    if (newForce) {
+      reqBody.force = newForce
+    }
+
+    if (newStretching) {
+      reqBody.stretching = newStretching
+    }
+
+    fetch(`change/${encodeURIComponent(sampleKey)}`, {
+      method: "PUT",
+      
+      headers: {
+        "Content-Type": "application/json",
+      },
         body: JSON.stringify({
           id: newHoldersampleKey,
           holder: newHolderName
@@ -83,13 +99,13 @@ class App extends Component {
       .then(response => response.json())
       .then(data => {
         if (data.success && data.result) {
-          this.notifySuccess('Holder was changed');
-        } else {
-          console.error(data.error);
-          this.notifyError('Something went wrong');
-        }
-      });
-    }
+        this.notifySuccess('Sample was changed');
+      } else {
+        console.error(data.error);
+        this.notifyError('Something went wrong');
+      }
+    });
+  }
   }
 
   handleTextChange = event => {
@@ -245,15 +261,15 @@ class App extends Component {
 
         <div className="changeContainerHolder">
           <form onSubmit={this.changeHolder}>
-            <label>Change Container Holder</label><br />
-             Enter a container ID:
+            <label>Change Sample Holder</label><br />
+
+            Enter a sample ID:
             <input
               className="form-control"
-              id="newHolderContainerId"
-              name="newHolderContainerId" 
-              placeholder="Ex: 1" 
-              type="number"
-              value={this.state.newHolderContainerId}
+              id="sampleKey"
+              type="string"
+              placeholder="Ex: Sample_1"
+              value={this.state.sampleKey}
               onChange={this.handleTextChange}
             />
             Enter name of new holder:
