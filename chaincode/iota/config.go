@@ -1,6 +1,6 @@
 package iota
 
-const endpoint = "https://nodes.devnet.iota.org"
+const endpoint = "http://iota.redbox.technology:14265"
 
 // difficulty of the proof of work required to attach a transaction on the tangle
 const mwm = 9

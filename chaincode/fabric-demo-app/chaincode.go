@@ -237,18 +237,18 @@ It takes one argument -- the key for the sample in question
 	// IOTA MAM stream values
 	messages := iota.Fetch(iotaPayload.Root, iotaPayload.Mode, iotaPayload.SideKey)
 
-	participantAsBytes, _ := APIstub.GetState(sample.Holder)
-	if participantAsBytes == nil {
-		return shim.Error("Could not locate participant")
-	}
-	participant := Participant{}
-	json.Unmarshal(participantAsBytes, &participant)
+	// participantAsBytes, _ := APIstub.GetState(sample.Holder)
+	// if participantAsBytes == nil {
+	// 	return shim.Error("Could not locate participant")
+	// }
+	// participant := Participant{}
+	// json.Unmarshal(participantAsBytes, &participant)
 
 	out := map[string]interface{}{}
 	out["sample"] = sample
 	out["mamstate"] = mamstate
 	out["messages"] = strings.Join(messages, ", ")
-	out["wallet"] = participant.Address
+	//out["wallet"] = participant.Address
 	
 	result, _ := json.Marshal(out)
 

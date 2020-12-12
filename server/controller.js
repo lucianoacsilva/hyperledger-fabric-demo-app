@@ -131,8 +131,17 @@ module.exports = {
 		            res.send({ success: false, error: `Could not locate container. ${query_responses[0]}` })
 
 		        } else {
-		            console.log("Response is", query_responses[0].toString());
-		            res.send({ success: true, result: query_responses[0].toString() });
+					console.log("Response is", query_responses[0].toString());
+					const jsonifiedResponse = JSON.parse(query_responses[0].toString());
+					const stringMessages = "[" + jsonifiedResponse["messages"] + "]";
+
+					jsonifiedResponse["messages"] = JSON.parse(stringMessages);
+					
+					console.log(jsonifiedResponse);
+		            res.send({ 
+						success: true, 
+						result: jsonifiedResponse 
+					});
 		        }
 		    } else {
 		        console.log("No payloads were returned from query");
